@@ -1,0 +1,18 @@
+laravel: "./workbench"
+
+providers:
+  - Pijler\Impersonation\ServiceProvider
+  - Workbench\App\Providers\WorkbenchServiceProvider
+
+migrations:
+  - workbench/database/migrations
+
+seeders:
+  - Workbench\Database\Seeders\DatabaseSeeder
+
+workbench:
+  start: "/"
+  install: true
+  discovers:
+    web: true
+    factories: true
