@@ -10,9 +10,6 @@ Secure user impersonation for Laravel, with per-request authorization, audit eve
 
 The actor stays logged in on the session, and the target only applies for the duration of each request. Permission is checked again on every request, so revoking it ends the impersonation right away.
 
-> [!WARNING]
-> This package is under development and has no stable release yet.
-
 ### 📦 Installation
 
 ```bash
@@ -157,15 +154,19 @@ They all have `id`, `actor`, `target` and `guard` properties. On `ImpersonationS
 
 #### Ignoring the switch on your listeners
 
-Switching users dispatches Laravel's `Authenticated` event, so listeners that treat it as a login should use `ImpersonationApplying` to ignore it:
+Switching users dispatches Laravel's `Authenticated` event, so listeners that treat it as a login should use `ImpersonationApplying` to ignore it.
+
+If you use [`pijler/user-devices`](https://github.com/Pijler/user-devices), add this listener to a service provider. Without it, every impersonated request saves a device and may send a login notification to the target.
 
 ```php
+use Illuminate\Support\Facades\Event;
+use Pijler\Impersonation\Events\ImpersonationApplying;
+use Pijler\UserDevices\DeviceCreator;
+
 Event::listen(ImpersonationApplying::class, function () {
-    // Skip your login logic for the current request.
+    DeviceCreator::ignoreListener();
 });
 ```
-
-[`pijler/user-devices`](https://github.com/Pijler/user-devices) already does this, so the switch doesn't create devices or send login notifications for the target.
 
 ### 🛡️ Guards
 
@@ -225,7 +226,7 @@ Keep in mind that:
 - **`protect.impersonate` redirected back, while `impersonation.protect` returns a 403.** Handle the 403 if your interface relied on the redirect.
 - **`$user->impersonate()` silently did nothing when denied, while `start` throws an exception.**
 - **`start` needs an authenticated actor who passes the gate**, and nested impersonation is blocked.
-- **`DeviceCreator::ignoreListener()` is now called by `pijler/user-devices` itself**, by listening to `ImpersonationApplying`. Update it along with this package.
+- **`DeviceCreator::ignoreListener()` isn't called automatically anymore.** See [Ignoring the switch on your listeners](#ignoring-the-switch-on-your-listeners).
 - **Impersonations in progress aren't carried over**, because the session keys changed. They need to be started again.
 
 ### 🧪 Testing
