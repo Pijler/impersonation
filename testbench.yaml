@@ -1,11 +1,13 @@
 laravel: "./workbench"
 
 providers:
+  - Laravel\Sanctum\SanctumServiceProvider
   - Pijler\Impersonation\ServiceProvider
   - Workbench\App\Providers\WorkbenchServiceProvider
 
 migrations:
   - workbench/database/migrations
+  - database/migrations
 
 seeders:
   - Workbench\Database\Seeders\DatabaseSeeder
