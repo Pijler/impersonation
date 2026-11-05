@@ -157,13 +157,15 @@ They all have `id`, `actor`, `target` and `guard` properties. On `ImpersonationS
 
 #### Ignoring the switch on your listeners
 
-Switching users dispatches Laravel's `Authenticated` event, so listeners that treat it as a login should use `ImpersonationApplying` to ignore it. For [`pijler/user-devices`](https://github.com/Pijler/user-devices):
+Switching users dispatches Laravel's `Authenticated` event, so listeners that treat it as a login should use `ImpersonationApplying` to ignore it:
 
 ```php
 Event::listen(ImpersonationApplying::class, function () {
-    DeviceCreator::ignoreListener();
+    // Skip your login logic for the current request.
 });
 ```
+
+[`pijler/user-devices`](https://github.com/Pijler/user-devices) already does this, so the switch doesn't create devices or send login notifications for the target.
 
 ### 🛡️ Guards
 
@@ -223,7 +225,7 @@ Keep in mind that:
 - **`protect.impersonate` redirected back, while `impersonation.protect` returns a 403.** Handle the 403 if your interface relied on the redirect.
 - **`$user->impersonate()` silently did nothing when denied, while `start` throws an exception.**
 - **`start` needs an authenticated actor who passes the gate**, and nested impersonation is blocked.
-- **`DeviceCreator::ignoreListener()` isn't called automatically anymore.** See [Ignoring the switch on your listeners](#ignoring-the-switch-on-your-listeners).
+- **`DeviceCreator::ignoreListener()` is now called by `pijler/user-devices` itself**, by listening to `ImpersonationApplying`. Update it along with this package.
 - **Impersonations in progress aren't carried over**, because the session keys changed. They need to be started again.
 
 ### 🧪 Testing
